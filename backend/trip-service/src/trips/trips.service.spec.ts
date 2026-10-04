@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service';
 import { TripsService } from './trips.service';
+import { KafkaService } from '../kafka/kafka.service';
 
 describe('TripsService', () => {
   let service: TripsService;
@@ -15,6 +16,10 @@ describe('TripsService', () => {
     },
   };
 
+  const kafkaServiceMock = {
+    publish: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -24,6 +29,10 @@ describe('TripsService', () => {
         {
           provide: PrismaService,
           useValue: prismaMock,
+        },
+        {
+          provide: KafkaService,
+          useValue: kafkaServiceMock,
         },
       ],
     }).compile();
@@ -67,6 +76,14 @@ describe('TripsService', () => {
       expect(createCall.data.destination).toBe(dto.destination);
       expect(createCall.data.startDate).toEqual(new Date(dto.startDate));
       expect(createCall.data.endDate).toEqual(new Date(dto.endDate));
+      expect(kafkaServiceMock.publish).toHaveBeenCalledWith(
+        'trip-created',
+        expect.objectContaining({
+          event: 'trip.created',
+          tripId: createdTrip.id,
+          userId: createdTrip.userId,
+        }),
+      );
     });
   });
 

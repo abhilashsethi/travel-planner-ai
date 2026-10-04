@@ -2,15 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
+import { KafkaService } from '../kafka/kafka.service';
 
 @Injectable()
 export class TripsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly kafkaService: KafkaService,
+  ) { }
 
   async create(createTripDto: CreateTripDto) {
     const { userId, title, destination, startDate, endDate } = createTripDto;
 
-    return this.prisma.trip.create({
+    const trip = await this.prisma.trip.create({
       data: {
         userId,
         title,
@@ -19,6 +23,20 @@ export class TripsService {
         endDate: new Date(endDate),
       },
     });
+
+    await this.kafkaService.publish('trip-created', {
+      event: 'trip.created',
+      tripId: trip.id,
+      userId: trip.userId,
+      title: trip.title,
+      destination: trip.destination,
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      status: trip.status,
+      createdAt: trip.createdAt,
+    });
+
+    return trip;
   }
 
 
