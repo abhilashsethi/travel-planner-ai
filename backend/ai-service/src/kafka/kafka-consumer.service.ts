@@ -8,7 +8,9 @@ import { ConfigService } from '@nestjs/config';
 import { Consumer, Kafka } from 'kafkajs';
 
 interface TripCreatedEvent {
+  eventId: string;
   event: 'trip.created';
+  schemaVersion: 1;
   tripId: string;
   userId: string;
   title: string;
@@ -98,10 +100,18 @@ export class KafkaConsumerService
     const event = payload as Record<string, unknown>;
 
     return (
+      event.eventId !== undefined &&
+      typeof event.eventId === 'string' &&
       event.event === 'trip.created' &&
+      event.schemaVersion === 1 &&
       typeof event.tripId === 'string' &&
       typeof event.userId === 'string' &&
-      typeof event.destination === 'string'
+      typeof event.title === 'string' &&
+      typeof event.destination === 'string' &&
+      typeof event.startDate === 'string' &&
+      typeof event.endDate === 'string' &&
+      typeof event.status === 'string' &&
+      typeof event.createdAt === 'string'
     );
   }
 

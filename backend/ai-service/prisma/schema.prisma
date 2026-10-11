@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["ai_service"]
+}
+
+enum PlanningStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+
+  @@schema("ai_service")
+}
+
+model PlanningJob {
+  id           String         @id @default(uuid())
+  eventId      String         @unique
+  tripId       String         @unique
+  userId       String
+  destination  String
+  status       PlanningStatus @default(PENDING)
+  attemptCount Int            @default(0)
+  errorMessage String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([status, createdAt])
+  @@schema("ai_service")
+}

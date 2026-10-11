@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
 import { KafkaService } from '../kafka/kafka.service';
+import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class TripsService {
@@ -25,7 +26,9 @@ export class TripsService {
     });
 
     await this.kafkaService.publish('trip-created', {
+      eventId: randomUUID(),
       event: 'trip.created',
+      schemaVersion: 1,
       tripId: trip.id,
       userId: trip.userId,
       title: trip.title,
