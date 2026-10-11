@@ -10,11 +10,14 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["user_service"]
 }
 
 enum UserRole {
   USER
   ADMIN
+
+  @@schema("user_service")
 }
 
 model User {
@@ -25,4 +28,6 @@ model User {
   role         UserRole @default(USER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@schema("user_service")
 }

@@ -14,3 +14,5 @@ coverage/
 .vscode/
 
 docker-data/
+
+travel_planner_backup_before_schema_split.dump

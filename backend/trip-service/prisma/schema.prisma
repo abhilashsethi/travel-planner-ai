@@ -10,6 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["trip_service"]
 }
 
 enum TripStatus {
@@ -17,6 +18,8 @@ enum TripStatus {
   CONFIRMED
   COMPLETED
   CANCELLED
+
+  @@schema("trip_service")
 }
 
 model Trip {
@@ -29,4 +32,6 @@ model Trip {
   status      TripStatus @default(PLANNING)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+
+  @@schema("trip_service")
 }
